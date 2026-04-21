@@ -3,43 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --bg: #07090d;
-  --bg-2: #0d1118;
-  --card: rgba(17, 20, 28, 0.88);
-  --card-2: rgba(22, 26, 36, 0.95);
-  --text: #f8fafc;
-  --muted: #9aa4b2;
-  --line: rgba(255, 255, 255, 0.08);
-  --accent: #ffffff;
-  --violet: #8b5cf6;
-  --blue: #60a5fa;
-  --pink: #ec4899;
+  --bg: #09090b;
+  --surface: #111114;
+  --surface-2: #18181b;
+  --border: #2a2a31;
+  --text: #ffffff;
+  --muted: #c4c4cc;
+  --muted-2: #8b8b95;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: #09090b;
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
-body {
-  margin: 0;
-  min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.16), transparent 30%),
-    radial-gradient(circle at top right, rgba(96, 165, 250, 0.14), transparent 28%),
-    radial-gradient(circle at bottom center, rgba(236, 72, 153, 0.10), transparent 30%),
-    linear-gradient(180deg, #090b10 0%, #06070b 100%);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 a {
-  color: inherit;
   text-decoration: none;
-}
-
-img {
-  display: block;
+  color: inherit;
 }
 
 button,
@@ -49,220 +38,104 @@ select {
   font: inherit;
 }
 
-.app-root {
-  min-height: 100vh;
-}
-
-.shell {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  min-height: 100vh;
-}
-
-@media (min-width: 1024px) {
-  .shell {
-    grid-template-columns: 280px minmax(0, 720px) 320px;
-    gap: 24px;
-    padding: 0 24px;
-  }
-}
-
-.sidebar-desktop {
-  display: none;
-}
-
-.rightpanel-desktop {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .sidebar-desktop,
-  .rightpanel-desktop {
-    display: block;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    padding: 24px 0;
-  }
-}
-
-.main-column {
-  width: 100%;
-  max-width: 760px;
+.app-shell {
+  max-width: 430px;
   margin: 0 auto;
   min-height: 100vh;
+  background: #09090b;
+}
+
+.page-padding {
   padding: 20px 16px 110px;
 }
 
-@media (min-width: 768px) {
-  .main-column {
-    padding: 24px 20px 40px;
-  }
-}
-
-.glass {
-  background: linear-gradient(
-    180deg,
-    rgba(20, 23, 31, 0.94) 0%,
-    rgba(12, 15, 21, 0.96) 100%
-  );
-  border: 1px solid var(--line);
+.main-card {
+  background: #111114;
+  border: 1px solid #2a2a31;
   border-radius: 24px;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(14px);
 }
 
-.soft {
-  background: linear-gradient(
-    180deg,
-    rgba(24, 28, 38, 0.94) 0%,
-    rgba(15, 18, 26, 0.96) 100%
-  );
-  border: 1px solid var(--line);
+.sub-card {
+  background: #18181b;
+  border: 1px solid #2a2a31;
   border-radius: 18px;
-}
-
-.hero {
-  background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.20), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.14), transparent 30%),
-    linear-gradient(180deg, rgba(21, 24, 33, 0.98), rgba(11, 13, 19, 0.98));
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  box-shadow:
-    0 14px 40px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .input-ui {
   width: 100%;
-  background: rgba(12, 15, 20, 0.98);
+  background: #18181b;
+  border: 1px solid #32323a;
   color: white;
-  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 14px 16px;
   outline: none;
 }
 
 .input-ui:focus {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
+  border-color: #5b5b66;
 }
 
 .input-ui::placeholder {
-  color: #6b7280;
+  color: #8b8b95;
 }
 
 .primary-btn {
+  width: 100%;
   border: none;
-  background: linear-gradient(135deg, #ffffff, #dbeafe);
-  color: black;
-  font-weight: 800;
   border-radius: 16px;
   padding: 14px 16px;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 700;
   cursor: pointer;
-  width: 100%;
-  transition: 0.18s ease;
-}
-
-.primary-btn:hover {
-  transform: translateY(-1px);
 }
 
 .secondary-btn {
-  border: 1px solid var(--line);
-  background: rgba(17, 20, 28, 0.98);
-  color: white;
-  font-weight: 700;
+  width: 100%;
+  border: 1px solid #32323a;
   border-radius: 16px;
   padding: 14px 16px;
+  background: #18181b;
+  color: #ffffff;
+  font-weight: 600;
   cursor: pointer;
-  width: 100%;
-}
-
-.icon-btn {
-  border: 1px solid var(--line);
-  background: rgba(17, 20, 28, 0.98);
-  color: white;
-  border-radius: 14px;
-  padding: 10px 12px;
-  cursor: pointer;
-}
-
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 800;
 }
 
 .top-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--line);
-  background: rgba(17, 20, 28, 0.88);
-  color: #d1d5db;
-  border-radius: 999px;
+  background: #151519;
+  border: 1px solid #2f2f36;
+  color: #e4e4e7;
   padding: 8px 12px;
+  border-radius: 999px;
   font-size: 12px;
+  font-weight: 600;
 }
 
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 10%, #c4b5fd 45%, #93c5fd 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.heading-xl {
+  font-size: 34px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.mobile-nav {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  z-index: 50;
+.heading-lg {
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-@media (min-width: 1024px) {
-  .mobile-nav {
-    display: none;
-  }
+.text-main {
+  color: #ffffff;
 }
 
-.desktop-nav-card {
-  padding: 18px;
+.text-muted {
+  color: #c4c4cc;
 }
 
-.preview-image {
-  width: 100%;
-  height: 280px;
-  object-fit: cover;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-}
-
-.feed-image {
-  width: 100%;
-  height: 380px;
-  object-fit: cover;
-  border-radius: 18px;
-  border: 1px solid var(--line);
-}
-
-@media (max-width: 640px) {
-  .feed-image {
-    height: 280px;
-  }
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.page-space {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.text-soft {
+  color: #8b8b95;
 }
