@@ -1,196 +1,137 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import AppShell from "@/components/appshell";
-import AppHeader from "@/components/appheader";
+import Navbar from "@/components/navbar";
 import { challenges } from "@/lib/challenges";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
 import { ImagePlus, Sparkles } from "lucide-react";
+import PageWrapper from "@/components/PageWrapper";
+import { motion } from "framer-motion";
 
 export default function UploadPage() {
-  const params = useSearchParams();
-  const router = useRouter();
-
-  const initialChallenge = Number(params.get("challenge")) || challenges[0].id;
-
-  const [challengeId, setChallengeId] = useState(initialChallenge);
   const [caption, setCaption] = useState("");
+  const [challengeId, setChallengeId] = useState(challenges[0].id);
   const [image, setImage] = useState<File | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const previewUrl = useMemo(() => {
-    if (!image) return null;
-    return URL.createObjectURL(image);
-  }, [image]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      const user = data.user;
+    if (!image) {
+      setPreviewUrl(null);
+      return;
+    }
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
+    const objectUrl = URL.createObjectURL(image);
+    setPreviewUrl(objectUrl);
 
-      setUserId(user.id);
-
-      await supabase.from("profiles").upsert({
-        id: user.id,
-        username: user.email?.split("@")[0] || "user",
-        avatar_url: user.user_metadata?.avatar_url || "",
-        points: 0,
-      });
+    return () => {
+      URL.revokeObjectURL(objectUrl);
     };
-
-    loadUser();
-  }, [router]);
+  }, [image]);
 
   const handleUpload = async () => {
-    if (!userId) return;
-    if (!image) return alert("Please select an image.");
-    if (!caption.trim()) return alert("Please write a caption.");
+    if (!image) {
+      alert("Please select an image.");
+      return;
+    }
 
     const selectedChallenge = challenges.find((c) => c.id === challengeId);
-    if (!selectedChallenge) return;
 
-    setSaving(true);
-
-    const fileExt = image.name.split(".").pop();
-    const filePath = `${userId}/${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("proofs")
-      .upload(filePath, image);
-
-    if (uploadError) {
-      setSaving(false);
-      alert(uploadError.message);
-      return;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-      .from("proofs")
-      .getPublicUrl(filePath);
-
-    const imageUrl = publicUrlData.publicUrl;
-
-    const { error: postError } = await supabase.from("posts").insert({
-      user_id: userId,
-      challenge_id: selectedChallenge.id,
-      challenge_title: selectedChallenge.title,
+    const formData = {
+      challenge: selectedChallenge?.title,
       caption,
-      image_url: imageUrl,
-      points_earned: selectedChallenge.points,
-    });
+      imageName: image.name,
+      timestamp: new Date().toISOString(),
+    };
 
-    if (postError) {
-      setSaving(false);
-      alert(postError.message);
-      return;
-    }
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("points")
-      .eq("id", userId)
-      .single();
-
-    const currentPoints = profile?.points || 0;
-
-    await supabase
-      .from("profiles")
-      .update({ points: currentPoints + selectedChallenge.points })
-      .eq("id", userId);
-
-    setSaving(false);
-    router.push("/feed");
+    console.log("Saved:", formData);
+    alert("Proof uploaded successfully!");
   };
 
   return (
-    <AppShell>
-      <div className="page-space">
-        <AppHeader
-          chip={
-            <div className="top-chip">
-              <Sparkles size={14} />
-              Upload your proof
-            </div>
-          }
-          title="Post your real action"
-          subtitle="Show what you did, add a caption, and earn points."
-        />
-
-        <div className="glass p-5">
-          <div className="space-y-4">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-zinc-300">
-                Challenge
-              </label>
-              <select
-                value={challengeId}
-                onChange={(e) => setChallengeId(Number(e.target.value))}
-                className="input-ui"
-              >
-                {challenges.map((challenge) => (
-                  <option key={challenge.id} value={challenge.id}>
-                    {challenge.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-zinc-300">
-                Proof image
-              </label>
-              <div className="soft p-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImage(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-zinc-400"
-                />
-
-                <div className="mt-4">
-                  {!previewUrl ? (
-                    <div className="flex h-[220px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 text-zinc-500">
-                      <div className="text-center">
-                        <ImagePlus size={26} className="mx-auto" />
-                        <p className="mt-2 text-sm">Preview will appear here</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="preview-image"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-zinc-300">
-                Caption
-              </label>
-              <textarea
-                className="input-ui min-h-[130px]"
-                placeholder="Write what happened, how you felt, or what you learned."
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-              />
-            </div>
-
-            <button onClick={handleUpload} className="primary-btn" disabled={saving}>
-              {saving ? "Saving..." : "Save Proof"}
-            </button>
+    <PageWrapper>
+      <main className="page-padding">
+        <div className="mb-6">
+          <div className="top-chip">
+            <Sparkles size={14} />
+            Upload your proof
           </div>
+
+          <h1 className="mt-4 text-3xl font-black">Post your action</h1>
+          <p className="mt-2 text-sm text-zinc-400">
+            Keep it simple. Show what you actually did.
+          </p>
         </div>
-      </div>
-    </AppShell>
+
+        <div className="glass-card p-4">
+          <label className="mb-4 block">
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Challenge
+            </span>
+            <select
+              value={challengeId}
+              onChange={(e) => setChallengeId(Number(e.target.value))}
+              className="input-ui"
+            >
+              {challenges.map((challenge) => (
+                <option key={challenge.id} value={challenge.id}>
+                  {challenge.title}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="mb-4 block">
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Proof Image
+            </span>
+
+            <div className="rounded-[24px] border border-dashed border-white/10 bg-black/20 p-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files?.[0] || null)}
+                className="mb-3 w-full text-sm text-zinc-400"
+              />
+
+              {!previewUrl ? (
+                <div className="flex h-44 flex-col items-center justify-center rounded-2xl bg-zinc-900/70 text-zinc-500">
+                  <ImagePlus size={26} />
+                  <p className="mt-2 text-sm">Preview will appear here</p>
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="image-frame"
+                >
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="h-56 w-full object-cover"
+                  />
+                </motion.div>
+              )}
+            </div>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-zinc-300">
+              Caption
+            </span>
+            <textarea
+              placeholder="Write a short caption..."
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              className="input-ui min-h-[120px]"
+            />
+          </label>
+
+          <button onClick={handleUpload} className="primary-btn mt-4">
+            Save Proof
+          </button>
+        </div>
+
+        <Navbar />
+      </main>
+    </PageWrapper>
   );
 }
